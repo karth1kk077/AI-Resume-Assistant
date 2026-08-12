@@ -1,0 +1,10 @@
+﻿.venv/
+server.log
+server_err.log
+__pycache__/
+*.pyc
+uploads/
+faiss_db/
+.env
+tailored_output/
+COMMIT_PLAN.MD
