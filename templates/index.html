@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Assistant - Intelligent Resume Analysis & Job Matching</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <div class="nav-brand-icon">AI</div>
+                    <span>Resume Assistant</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                    <li><a href="#analysis" class="nav-link" data-section="analysis">Analysis</a></li>
+                    <li><a href="#jobs" class="nav-link" data-section="jobs">Job Matching</a></li>
+                    <li><a href="/logout" class="nav-link">Sign out</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <header class="page-header">
+                <span class="page-eyebrow">AI-Powered</span>
+                <h1 class="page-title">Analyze Your Resume</h1>
+                <p class="page-description">
+                    Upload your resume to get instant ATS compatibility scores, identify missing skills,
+                    and discover matching job opportunities tailored to your experience.
+                </p>
+            </header>
+
+            <!-- Upload & Job Description Section -->
+            <section id="dashboard" class="grid grid-cols-2 mb-6">
+                <!-- Resume Upload Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Upload Resume</h2>
+                        <p class="card-subtitle">PDF files up to 10MB</p>
+                    </div>
+
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">↑</div>
+                        <input type="file" id="resumeFile" accept=".pdf" style="display: none;">
+                        <p class="upload-title">Drop your resume here</p>
+                        <p class="upload-subtitle">or click to browse files</p>
+                        <button class="btn btn-secondary" onclick="document.getElementById('resumeFile').click()">
+                            Browse Files
+                        </button>
+                    </div>
+
+                    <div id="uploadStatus" class="status"></div>
+
+                    <div id="resumeInfo" class="hidden" style="margin-top: var(--space-4);">
+                        <div class="flex items-center gap-2">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M6 2C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V16C4 16.5304 4.21071 17.0391 4.58579 17.4142C4.96086 17.7893 5.46957 18 6 18H14C14.5304 18 15.0391 17.7893 15.4142 17.4142C15.7893 17.0391 16 16.5304 16 16V7L11 2H6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M11 2V7H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span id="resumeName" style="font-size: var(--text-sm); font-weight: var(--font-medium);"></span>
+                            <span id="resumeId" class="badge badge-primary"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Description Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Job Description</h2>
+                        <p class="card-subtitle">Paste the job posting you're targeting</p>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea
+                            id="jobDescription"
+                            class="textarea"
+                            placeholder="Paste the complete job description here, including requirements, qualifications, and responsibilities..."
+                            rows="10"
+                            style="margin-bottom: var(--space-4);"
+                        ></textarea>
+                    </div>
+
+                    <button class="btn btn-success btn-lg" onclick="analyzeResume()" id="analyzeBtn" disabled>
+                        Analyze Resume
+                    </button>
+                </div>
+            </section>
+
+            <!-- Analysis Progress -->
+            <div id="analysisProgress" class="card hidden" style="margin-bottom: var(--space-6);">
+                <div style="text-align: center;">
+                    <div class="spinner spinner-lg" style="margin: 0 auto var(--space-4);"></div>
+                    <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-2);">Analyzing Your Resume</h3>
+                    <p style="color: var(--text-secondary); font-size: var(--text-sm);" id="progressText">Extracting resume information...</p>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="analysis">
+            <section id="resultsSection" class="hidden">
+                <!-- ATS Score Card -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <h2 class="card-title">ATS Compatibility Score</h2>
+                        <p class="card-subtitle">How well your resume matches the job requirements</p>
+                    </div>
+
+                    <div class="score-container">
+                        <div class="score-circle">
+                            <svg class="score-svg" width="120" height="120" viewBox="0 0 120 120">
+                                <circle class="score-track" cx="60" cy="60" r="52" />
+                                <circle class="score-fill" id="scoreFill" cx="60" cy="60" r="52"
+                                    stroke-dasharray="327" stroke-dashoffset="327" />
+                            </svg>
+                            <div class="score-value">
+                                <span class="score-number" id="atsScore">0</span>
+                                <span class="score-label">/100</span>
+                            </div>
+                        </div>
+
+                        <div class="score-details">
+                            <div class="score-metric">
+                                <div class="score-metric-label">Matched Skills</div>
+                                <div class="score-metric-value" id="matchedSkills">—</div>
+                            </div>
+                            <div class="score-metric">
+                                <div class="score-metric-label">Missing Skills</div>
+                                <div class="score-metric-value" id="missingSkills">—</div>
+                            </div>
+                            <div class="score-metric">
+                                <div class="score-metric-label">Overall Match</div>
+                                <div class="score-metric-value">
+                                    <span id="skillPercentage">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="suggestions">
+                        <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); margin: var(--space-6) 0 var(--space-3);">Improvement Suggestions</h3>
+                        <ul id="suggestionList" style="list-style: none; padding: 0;"></ul>
+                    </div>
+                </div>
+
+                <!-- Candidate Summary Card -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <h2 class="card-title">Candidate Summary</h2>
+                        <p class="card-subtitle">AI-generated analysis of your profile</p>
+                    </div>
+
+                    <div id="summaryContent">
+                        <div style="margin-bottom: var(--space-6); padding-bottom: var(--space-6); border-bottom: 1px solid var(--border-primary);">
+                            <h4 style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">Professional Summary</h4>
+                            <p id="profSummary" style="color: var(--text-secondary);">—</p>
+                        </div>
+
+                        <div style="margin-bottom: var(--space-6); padding-bottom: var(--space-6); border-bottom: 1px solid var(--border-primary);">
+                            <h4 style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">Experience Summary</h4>
+                            <p id="expSummary" style="color: var(--text-secondary);">—</p>
+                        </div>
+
+                        <div style="margin-bottom: var(--space-6); padding-bottom: var(--space-6); border-bottom: 1px solid var(--border-primary);">
+                            <h4 style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3);">Key Technical Skills</h4>
+                            <div id="keySkills" class="skill-tags"></div>
+                        </div>
+
+                        <div class="grid grid-cols-2" style="margin-bottom: var(--space-6);">
+                            <div>
+                                <h4 style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3);">Strengths</h4>
+                                <ul id="strengthsList" style="list-style: none; padding: 0;"></ul>
+                            </div>
+                            <div>
+                                <h4 style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3);">Areas for Improvement</h4>
+                                <ul id="weaknessesList" style="list-style: none; padding: 0;"></ul>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">Hiring Recommendation</h4>
+                            <p id="recommendation" style="font-weight: var(--font-semibold); font-size: var(--text-base);">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interview Questions Card -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <h2 class="card-title">Interview Questions</h2>
+                        <p class="card-subtitle">Tailored questions based on your resume and the job</p>
+                    </div>
+
+                    <div class="tabs">
+                        <ul class="tabs-list">
+                            <li><button class="tab-button active" onclick="showTab('technical')">Technical</button></li>
+                            <li><button class="tab-button" onclick="showTab('behavioral')">Behavioral</button></li>
+                            <li><button class="tab-button" onclick="showTab('scenario')">Scenario-Based</button></li>
+                        </ul>
+                    </div>
+
+                    <div id="technicalQuestions" class="tab-panel active">
+                        <ul id="techQuestionsList" style="list-style: none; padding: 0;"></ul>
+                    </div>
+                    <div id="behavioralQuestions" class="tab-panel">
+                        <ul id="behavioralQuestionsList" style="list-style: none; padding: 0;"></ul>
+                    </div>
+                    <div id="scenarioQuestions" class="tab-panel">
+                        <ul id="scenarioQuestionsList" style="list-style: none; padding: 0;"></ul>
+                    </div>
+                </div>
+
+                <!-- AI Chat Card -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <h2 class="card-title">Ask About This Candidate</h2>
+                        <p class="card-subtitle">Get instant answers about experience, skills, and qualifications</p>
+                    </div>
+
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-message chat-message-bot">
+                                <div class="chat-message-avatar">AI</div>
+                                <div class="chat-message-content">
+                                    Ask me anything about this candidate's resume, experience, projects, or skills. I'll provide detailed insights based on the uploaded resume.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input
+                                type="text"
+                                id="chatInput"
+                                class="input"
+                                placeholder="Ask a question about this candidate..."
+                                onkeypress="if(event.key==='Enter') sendChatMessage()"
+                            >
+                            <button class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            </div>
+
+            <!-- Job Search Section -->
+            <div id="jobs">
+            <section class="mt-6">
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <h2 class="card-title">Find Matching Jobs</h2>
+                        <p class="card-subtitle">
+                            Search job boards and get tailored resumes for high-match positions.
+                            All applications require your review before submission.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-3" style="margin-bottom: var(--space-4);">
+                        <div class="form-group" style="grid-column: span 3;">
+                            <label class="form-label">Role or Keywords</label>
+                            <input type="text" id="jobKeywords" class="input" placeholder="e.g., Backend Engineer, Python Developer">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" id="jobLocation" class="input" placeholder="Remote, City, etc.">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Min ATS Score</label>
+                            <input type="number" id="minAtsScore" class="input" value="60" min="0" max="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Max Results</label>
+                            <input type="number" id="maxResults" class="input" value="25" min="1" max="50">
+                        </div>
+
+                        <div class="form-group" style="grid-column: span 3;">
+                            <label class="form-label">Greenhouse Boards (Optional)</label>
+                            <input type="text" id="greenhouseBoards" class="input" placeholder="Comma-separated board tokens">
+                            <span class="form-hint">Add custom Greenhouse job boards to search</span>
+                        </div>
+
+                        <div class="form-group" style="grid-column: span 3;">
+                            <label class="form-label">Lever Companies (Optional)</label>
+                            <input type="text" id="leverCompanies" class="input" placeholder="Comma-separated company slugs">
+                            <span class="form-hint">Add custom Lever company pages to search</span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success btn-lg" onclick="searchJobs()" id="searchJobsBtn">
+                        Search Jobs
+                    </button>
+
+                    <div id="jobSearchStatus" class="status"></div>
+                    <div id="jobResults" style="margin-top: var(--space-6);"></div>
+                </div>
+
+                <!-- Tailored Resume Result -->
+                <div class="card hidden" id="tailorResultCard">
+                    <div class="card-header">
+                        <h2 class="card-title">Tailored Application</h2>
+                        <p class="card-subtitle">Review your customized resume and cover letter</p>
+                    </div>
+                    <div id="tailorResult"></div>
+                </div>
+            </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

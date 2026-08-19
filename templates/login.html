@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - AI Resume Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <!-- Brand panel -->
+        <aside class="auth-panel">
+            <div class="auth-brand">
+                <div class="auth-brand-icon">AI</div>
+                <span>Resume Assistant</span>
+            </div>
+
+            <div class="auth-demo" aria-hidden="true">
+                <div class="auth-doc">
+                    <div class="auth-doc-head">
+                        <span class="auth-doc-name"></span>
+                        <span class="auth-doc-role"></span>
+                    </div>
+                    <span class="auth-doc-line auth-line-1"></span>
+                    <span class="auth-doc-line auth-line-2"></span>
+                    <span class="auth-doc-line auth-line-3"></span>
+
+                    <div class="auth-chips">
+                        <span class="auth-chip">Python</span>
+                        <span class="auth-chip">FastAPI</span>
+                        <span class="auth-chip">SQL</span>
+                        <span class="auth-chip">Docker</span>
+                        <span class="auth-chip auth-chip-more">+4</span>
+                    </div>
+
+                    <div class="auth-score">
+                        <svg width="64" height="64" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="5"/>
+                            <circle class="auth-score-ring" cx="32" cy="32" r="27" fill="none" stroke="#86EFAC" stroke-width="5"
+                                stroke-linecap="round" transform="rotate(-90 32 32)"
+                                stroke-dasharray="169.6" stroke-dashoffset="169.6"/>
+                        </svg>
+                        <div class="auth-score-meta">
+                            <strong>92</strong>
+                            <span>ATS match</span>
+                        </div>
+                    </div>
+
+                    <span class="auth-scan"></span>
+                </div>
+            </div>
+
+            <p class="auth-tagline">
+                Upload a resume, paste a job post, and get an instant breakdown —
+                matched skills, gaps, and interview questions.
+            </p>
+        </aside>
+
+        <!-- Sign-in form -->
+        <section class="auth-content">
+            <div class="auth-form-wrap">
+                <header class="auth-header">
+                    <h1>Welcome back</h1>
+                    <p>Sign in to continue to Resume Assistant.</p>
+                </header>
+
+                {% if error %}
+                <div class="auth-error" role="alert">
+                    Email or password is incorrect. Try again.
+                </div>
+                {% endif %}
+
+                {% if demo_hint %}
+                <div class="auth-hint">
+                    Demo access: {{ demo_hint }}
+                </div>
+                {% endif %}
+
+                <form method="post" action="/login" class="auth-form">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="input"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                            autofocus
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <div class="auth-password">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="input"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button type="button" class="auth-toggle" aria-label="Show password" aria-pressed="false">
+                                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <path d="M10 4C5.5 4 2.3 7.6 1.3 9.4c-.14.25-.14.95 0 1.2C2.3 12.4 5.5 16 10 16s7.7-3.6 8.7-5.4c.14-.25.14-.95 0-1.2C17.7 7.6 14.5 4 10 4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                    <circle cx="10" cy="10" r="2.75" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <label class="auth-remember">
+                        <input type="checkbox" name="remember" value="1">
+                        <span>Keep me signed in for 30 days</span>
+                    </label>
+
+                    <button type="submit" class="btn btn-primary btn-lg auth-submit">Sign in</button>
+                </form>
+
+                <footer class="auth-footer">
+                    <p>Authorized users only. Access is logged.</p>
+                </footer>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const toggle = document.querySelector('.auth-toggle');
+        const field = document.getElementById('password');
+        toggle.addEventListener('click', () => {
+            const show = field.type === 'password';
+            field.type = show ? 'text' : 'password';
+            toggle.setAttribute('aria-pressed', String(show));
+            toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            field.focus();
+        });
+    </script>
+</body>
+</html>
