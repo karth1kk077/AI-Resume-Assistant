@@ -1,6 +1,9 @@
 ﻿.venv/
 server.log
 server_err.log
+server_test.log
+server_test_err.log
+sample_resume.pdf
 __pycache__/
 *.pyc
 uploads/
@@ -8,3 +11,4 @@ faiss_db/
 .env
 tailored_output/
 COMMIT_PLAN.MD
+skills-lock.json
