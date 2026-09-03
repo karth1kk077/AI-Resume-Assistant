@@ -1,4 +1,4 @@
-# 🤖 AI Resume Screening & Interview Assistant
+# AI Resume Screening & Interview Assistant
 
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115.0-green.svg)](https://fastapi.tiangolo.com/)
@@ -6,45 +6,47 @@
 [![LangChain](https://img.shields.io/badge/LangChain-0.3.0-yellow.svg)](https://www.langchain.com/)
 [![License](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
 
-> 🚀 An AI-powered resume screening, job matching, and interview assistant built with Python, FastAPI, NLP, FAISS, and the Google Gemini API.
+> An AI-powered resume screening, job matching, and interview assistant built with Python, FastAPI, NLP, FAISS, and the Google Gemini API.
 
 Upload a resume, paste a job description, and get an instant ATS score, an AI-generated candidate summary, tailored interview questions, eligible job matches from public job boards, and a downloadable tailored resume + cover letter.
 
-## 📌 Features
+## Features
 
-### 📄 Resume Upload & Processing
+### Resume Upload & Processing
 - Upload PDF resumes with drag-and-drop support
 - Automatic text extraction using PyMuPDF
 - Support for multi-page resumes
 
-### 🔍 ATS Score Calculator
+### ATS Score Calculator
 - **Skill Match Percentage** - Compare resume skills with job requirements
 - **Matched Skills** - Identify skills that align with the job
 - **Missing Skills** - Highlight gaps for improvement
 - **ATS Score** - Get a compatibility score out of 100
 - **Smart Recommendations** - Actionable suggestions for resume optimization
 
-### 👤 AI-Powered Candidate Summary
+### AI-Powered Candidate Summary
 - **Professional Summary** - AI-generated overview of the candidate
 - **Experience Summary** - Key achievements and experience highlights
 - **Key Technical Skills** - Extracted and ranked skills
 - **Strengths & Weaknesses** - AI-analyzed candidate profile
 - **Hiring Recommendation** - AI-driven hiring decision support
 
-### 🎤 Smart Interview Question Generator
+### Smart Interview Question Generator
 - **10 Technical Questions** - Role-specific technical assessment
 - **5 Behavioral Questions** - Soft skills and cultural fit evaluation
 - **5 Scenario-Based Questions** - Real-world problem-solving scenarios
 - Questions are **tailored** to the candidate's resume and job description
+- Deterministic fallbacks when Gemini API is unavailable
 
-### 💬 RAG-Powered Chat Assistant
+### RAG-Powered Chat Assistant
 - **Ask Questions** about the candidate's resume
 - **Context-Aware Responses** using FAISS vector embeddings
 - **Project & Experience Queries** - "What projects has the candidate worked on?"
 - **Skill Verification** - "Does the candidate know FastAPI?"
 - **Strictly from documents** - No hallucination
+- Text-based fallback when embeddings are unavailable
 
-### 🎯 Job Search & ATS Filtering
+### Job Search & ATS Filtering
 - Searches live job postings from **public, ToS-compliant sources**:
   - [RemoteOK](https://remoteok.com/api) - no API key required
   - [Adzuna](https://developer.adzuna.com/) - free API key required
@@ -54,7 +56,7 @@ Upload a resume, paste a job description, and get an instant ATS score, an AI-ge
 - Only jobs meeting a configurable minimum ATS score ("eligible" jobs) are returned, sorted by fit
 - Does **not** scrape LinkedIn/Indeed and does **not** auto-submit applications
 
-### 📝 Resume Tailoring & Cover Letter Builder
+### Resume Tailoring & Cover Letter Builder
 - Rewrites/reorders the candidate's **real** experience to maximize ATS keyword match for one specific job
 - **Honesty-first**: never invents employers, titles, dates, degrees, or skills
 - Shows **before/after ATS scores** so you can see the improvement
@@ -62,22 +64,32 @@ Upload a resume, paste a job description, and get an instant ATS score, an AI-ge
 - Downloads the results as ready-to-apply **`.docx` files**
 - Nothing is submitted anywhere - you review and apply yourself
 
-### 🎨 Modern Dashboard
+### Secure Login & Sessions
+- Single shared login via environment variables (`APP_USERNAME` / `APP_PASSWORD`)
+- Default credentials: `demo@resume.ai` / `resume123`
+- Session-based authentication with in-memory tokens
+- "Remember me" support (30-day persistent sessions)
+- Optional demo hint on the login page (`APP_DEMO_HINT=1`)
+- Logout endpoint to clear sessions
+
+### Modern Dashboard
 - Clean, responsive UI with real-time updates
 - Interactive ATS score visualization
 - Tabbed interview questions view (Technical / Behavioral / Scenario)
 - Embedded AI chat interface
 - Job search & tailoring workspace
+- Dark-themed login page
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 - **Python 3.12** - Core programming language
 - **FastAPI** - High-performance web framework
-- **Google Gemini API** - LLM for summaries, questions, tailoring, and chat answers
+- **Uvicorn** - ASGI server
+- **Google Gemini API** (`gemini-3.6-flash`) - LLM for summaries, questions, tailoring, and chat answers
 - **LangChain** - Framework for LLM applications
-- **FAISS** - Vector search for RAG
-- **Sentence Transformers** - Embedding generation
+- **FAISS** (`faiss-cpu`) - Vector search for RAG
+- **Sentence Transformers** (`all-MiniLM-L6-v2`) - Embedding generation
 - **PyMuPDF** - PDF text extraction
 - **python-docx** - Tailored resume / cover letter generation (.docx)
 - **Requests** - Job board API clients
@@ -85,8 +97,9 @@ Upload a resume, paste a job description, and get an instant ATS score, an AI-ge
 ### Frontend
 - **HTML/CSS/JavaScript** - Clean, responsive design
 - **Jinja2 Templates** - Server-side rendering
+- CSS custom properties design system with 60+ tokens
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 - Python 3.12+
@@ -95,7 +108,7 @@ Upload a resume, paste a job description, and get an instant ATS score, an AI-ge
 ### Step 1: Clone the Repository
 
 ```bash
-git clone karth1kk077/AI-Resume-Assistant
+git clone https://github.com/karth1kk077/AI-Resume-Assistant.git
 cd AI-Resume-Assistant
 ```
 
@@ -137,26 +150,54 @@ Then edit `.env`:
 ```env
 GEMINI_API_KEY=your_gemini_key_here
 
+# Optional - Gemini model (default: gemini-3.6-flash)
+GEMINI_MODEL=gemini-3.6-flash
+
+# Optional - Gemini API timeout in seconds (default: 120)
+GEMINI_TIMEOUT=120
+
 # Optional - enables the Adzuna job source (RemoteOK works with no key)
 ADZUNA_APP_ID=your_adzuna_app_id
 ADZUNA_APP_KEY=your_adzuna_app_key
+
+# Login credentials for the web UI
+APP_USERNAME=demo@resume.ai
+APP_PASSWORD=resume123
+
+# Set to 1 to show demo credentials on the login page
+APP_DEMO_HINT=0
+
+# Optional - custom directories for uploads and output
+UPLOAD_DIR=./uploads
+TAILORED_DIR=./tailored_output
 ```
 
-> 💡 The app runs without `ADZUNA_APP_ID`/`ADZUNA_APP_KEY` - RemoteOK still works. Only the Adzuna job source is disabled.
+> The app runs without `ADZUNA_APP_ID`/`ADZUNA_APP_KEY` - RemoteOK still works. Only the Adzuna job source is disabled.
+>
+> All AI features have graceful fallbacks when `GEMINI_API_KEY` is missing, so the app functions in a degraded but non-crashing mode.
 
 ### Step 5: Run the Application
+
+**Windows (one-click):**
+
+Double-click `run.bat` - it starts the server, waits for it to be ready, and opens your browser automatically.
+
+**Manual:**
 
 ```bash
 python app.py
 ```
 
-Open your browser and go to **http://localhost:8000**
+Open your browser and go to **http://localhost:8000** (redirects to `/login`).
 
-## 🔌 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/` | Dashboard UI |
+| `GET` | `/` | Dashboard UI (requires login) |
+| `GET` | `/login` | Login page |
+| `POST` | `/login` | Authenticate with credentials |
+| `GET` | `/logout` | Clear session and redirect to login |
 | `GET` | `/api/health` | Health check |
 | `POST` | `/api/upload-resume` | Upload a PDF resume, returns a `resume_id` |
 | `POST` | `/api/analyze-resume` | ATS score, candidate summary & interview questions for a job description |
@@ -165,37 +206,40 @@ Open your browser and go to **http://localhost:8000**
 | `POST` | `/api/tailor-resume` | Generate a tailored resume + cover letter for one job |
 | `GET` | `/api/download-tailored/{tailor_id}/{doc_type}` | Download the tailored `.docx` (doc_type: `resume` or `cover-letter`) |
 
-## 📂 Project Structure
+## Project Structure
 
 ```
-├── app.py                  # FastAPI application & routes
-├── requirements.txt
-├── .env.example
+├── app.py                      # FastAPI application, routes & authentication
+├── requirements.txt            # Python dependencies
+├── .env.example                # Environment variable template
+├── run.bat                     # Windows one-click launcher
 ├── templates/
-│   └── index.html          # Dashboard UI
+│   ├── index.html              # Dashboard UI
+│   └── login.html              # Sign-in page
 ├── static/
-│   ├── app.js              # Frontend logic
-│   └── style.css
+│   ├── app.js                  # Frontend logic
+│   └── style.css               # Design system (60+ CSS variables)
 ├── utils/
-│   ├── pdf_reader.py       # PDF text extraction
-│   ├── skill_extractor.py  # Skills / keyword extraction
-│   ├── ats_score.py        # ATS score calculator
-│   ├── candidate_summary.py# Gemini candidate summary
-│   ├── interview_generator.py # Interview question generation
-│   ├── rag_engine.py       # FAISS vector store + chat answers
-│   ├── job_search.py       # RemoteOK / Adzuna / Greenhouse / Lever clients
-│   ├── resume_tailor.py    # ATS keyword tailoring via Gemini
-│   └── resume_builder.py   # .docx generation for resume & cover letter
-├── uploads/                # Uploaded resumes (created at runtime)
-├── tailored_output/        # Generated .docx files (created at runtime)
-├── faiss_db/               # Vector index (created at runtime)
+│   ├── __init__.py
+│   ├── pdf_reader.py           # PDF text extraction (PyMuPDF)
+│   ├── skill_extractor.py      # Skills / keyword extraction
+│   ├── ats_score.py            # ATS score calculator
+│   ├── candidate_summary.py    # Gemini candidate summary
+│   ├── interview_generator.py  # Interview question generation
+│   ├── rag_engine.py           # FAISS vector store + chat answers
+│   ├── job_search.py           # RemoteOK / Adzuna / Greenhouse / Lever clients
+│   ├── resume_tailor.py        # ATS keyword tailoring via Gemini
+│   └── resume_builder.py       # .docx generation for resume & cover letter
+├── uploads/                    # Uploaded resumes (created at runtime)
+├── tailored_output/            # Generated .docx files (created at runtime)
+├── faiss_db/                   # Vector index (created at runtime)
 └── screenshots/
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## 📄 License
+## License
 
 [MIT](LICENSE)
